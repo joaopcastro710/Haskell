@@ -7,8 +7,8 @@
 -}
 module Main where
 
-import Parsing
-import Data.Char
+import Parsing {-(Parser, parse, (<|>), satisfy, char, many1)-}
+import Data.Char {-(isDigit, isAlpha)-}
 
 --
 -- a data type for expressions
@@ -16,7 +16,10 @@ import Data.Char
 --
 data Expr = Num Integer
           | Add Expr Expr
+          | Sub Expr Expr
           | Mul Expr Expr
+          | Div Expr Expr 
+          | Mod Expr Expr
           deriving Show
 
 -- a recursive evaluator for expressions
@@ -24,7 +27,10 @@ data Expr = Num Integer
 eval :: Expr -> Integer
 eval (Num n) = n
 eval (Add e1 e2) = eval e1 + eval e2
+eval (Sub e1 e2) = eval e1 - eval e2
 eval (Mul e1 e2) = eval e1 * eval e2
+eval (Div a b) = eval a `div` eval b
+eval (Mod a b) = eval a `mod` eval b
 
 -- | a parser for expressions
 -- Grammar rules:
@@ -45,6 +51,10 @@ exprCont :: Expr -> Parser Expr
 exprCont acc = do char '+'
                   t <- term
                   exprCont (Add acc t)
+               <|>
+               do char '-'
+                  t <- term
+                  exprCont (Sub acc t)
                <|> return acc
               
 term :: Parser Expr
@@ -55,6 +65,14 @@ termCont :: Expr -> Parser Expr
 termCont acc =  do char '*'
                    f <- factor  
                    termCont (Mul acc f)
+                 <|>
+                do char '/'
+                   f <- factor
+                   termCont (Div acc f)
+                 <|>
+                do char '%'
+                   f <- factor 
+                   termCont (Mod acc f)
                  <|> return acc
 
 factor :: Parser Expr
