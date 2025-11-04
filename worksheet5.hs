@@ -1,4 +1,4 @@
-
+import Data.List 
 
 -- 5.1
 
@@ -46,11 +46,7 @@ cmp2 (Card f1 s1) (Card f2 s2)
 
 
 --------------------------------------------
--- Set.hs
-module Set (Set, empty, fromList, member, insert, size, height) where
-
-import Data.List (sort)
-
+{-
 -- Tipo interno da árvore (nota a ordem Node value left right)
 data Set a = Empty
            | Node a (Set a) (Set a)
@@ -110,21 +106,59 @@ size (Node _ l r) = 1 + size l + size r
 height :: Set a -> Int
 height Empty = 0
 height (Node _ l r) = 1 + max (height l) (height r)
+-}
+-- 5.6
 
+type Name = Char
 
 data Prop = Const Bool
           | Var Name
           | Not Prop
           | And Prop Prop
           | Imply Prop Prop
+          | Or Prop Prop
           deriving Show
+
+type Env = [(Name, Bool)]
+
+eval :: Env -> Prop -> Bool
+eval _ (Const b) = b
+eval env (Var x) = case lookup x env of
+                  Just v -> v
+                  Nothing -> error ("Undefined variable")
+eval env (Not p) = not (eval env p)
+eval env (And p q) = eval env p && eval env q
+eval env (Imply p q) = not (eval env p) || eval env q
+eval env (Or p q) = eval env p || eval env q
+
+-- lookup :: Eq a => a -> [(a,b)] -> Maybe b  // comes from the Prelude
 
 -- 5.7
 
-vars :: Prop 
+vars :: Prop -> [Name]
+vars (Const _) = []
+vars (Var x) = [x]
+vars (Not p) = vars p
+vars (And p q) = vars p ++ vars q
+vars (Imply p q) = vars p ++ vars q
+vars (Or p q) = vars p ++ vars q
 
 -- 5.8
 
+booleans :: Int -> [[Bool]]
+booleans 0 = [[]]
+booleans n =
+  [b:bs | b <- [False, True], bs <- booleans (n-1)]
+
 -- 5.9
 
+environments :: [Name] -> [Env]
+environments ns = map (zip ns) (booleans (length ns))
+
 -- 5.10
+
+table :: Prop -> [(Env, Bool)]
+table p =
+  let ns   = names p  
+      envs = environments ns        
+  in [ (e, eval e p) | e <- envs ]
