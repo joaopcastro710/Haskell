@@ -7,8 +7,8 @@
 -}
 module Main where
 
-import Parsing ( Parser, parse, (<|>), satisfy, char, many1 )
-import Data.Char (isDigit, isAlpha)
+import Parsing 
+import Data.Char
 
 type Env = [(String, Integer)] -- var
 
@@ -37,8 +37,9 @@ data Expr = Num Integer
           | Mod Expr Expr
           deriving Show
 
-data Command = Assign String Expr | Eval Expr
-          deriving Show
+data Command = Assign String Expr -- atribuição
+              | Eval Expr         -- expressão
+              deriving Show
 
 -- a recursive evaluator for expressions
 --
@@ -148,10 +149,10 @@ calculator env (l:ls) = do
 evaluate :: Env -> String -> (String, Env)
 evaluate env txt =
   case parse command txt of
-    [(Assign var expression, "")] ->
+    [(Assign var expression, "")] -> -- avalia, produz, output
       let val  = eval env expression
           env' = updateVar var val env
       in (show val, env')
-    [(Eval expression, "")] ->
+    [(Eval expression, "")] ->      -- só output
       (show (eval env expression), env)
     _ -> ("parse error; try again", env)

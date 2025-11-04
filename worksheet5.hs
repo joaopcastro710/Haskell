@@ -112,5 +112,19 @@ height Empty = 0
 height (Node _ l r) = 1 + max (height l) (height r)
 
 
--- 5.5
+data Prop = Const Bool
+          | Var Name
+          | Not Prop
+          | And Prop Prop
+          | Imply Prop Prop
+          deriving Show
 
+-- 5.7
+
+vars :: Prop 
+
+-- 5.8
+
+-- 5.9
+
+-- 5.10
