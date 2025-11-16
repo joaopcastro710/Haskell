@@ -1,4 +1,4 @@
-import Data.Char (ord, chr, isLower, isUpper)
+cd testimport Data.Char (ord, chr, isLower, isUpper)
 import Data.List (sort)
 -- 4.1
 
